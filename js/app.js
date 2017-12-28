@@ -1,7 +1,7 @@
 new Vue({
 	el: '#app',
 	data: {
-		songsList: [],
+		fetchedSongs: [],
 		genres: [],
 		artists: [],
 		songs: [],
@@ -11,7 +11,7 @@ new Vue({
 		audioSrc: '',
 		isRecording: false,
 		isPlaying: false,
-		audio: []
+		recordedAudio: []
 
 	},
 	methods: {
@@ -32,23 +32,21 @@ new Vue({
 			}
 		},
 		stop() {
-			let myAudio = this;
-			if(myAudio.isRecording == true) {
-				myAudio.isRecording = false;
-				myAudio.mediaRecorder.stop();
-				var blob = new Blob(myAudio.audio, {
+			if(this.isRecording == true) {
+				this.isRecording = false;
+				this.mediaRecorder.pause();
+				var blob = new Blob(this.recordedAudio, {
 	        'type': 'audio/ogg; codecs=opus'
 	      });
-	      myAudio.audio = [];
 	      var audioURL = window.URL.createObjectURL(blob);
-	      myAudio.audioSrc = audioURL;
-	    } else if(myAudio.isPlaying == true) {
-	    	myAudio.audioSrc = '';
-	    	myAudio.isPlaying = false;
+	      this.audioSrc = audioURL;
+	      this.recordedAudio = [];
+	    } else if(this.isPlaying == true) {
+	    	this.audioSrc = '';
+	    	this.isPlaying = false;
 	    }
 		},
-		rewind() {
-			console.log('Song has rewinded by 10sec');
+		previous() {
 			if(this.isPlaying == true) {
 				var songsList = document.getElementById('songs');
 				var selectedSong = songsList.selectedIndex;
@@ -58,7 +56,7 @@ new Vue({
 				this.audioSrc = `./media/${this.selectedSong}.mp3`;
 			}
 		},
-		forward() {
+		next() {
 			if(this.isPlaying == true) {
 				var songsList = document.getElementById('songs');
 				var selectedSong = songsList.selectedIndex;
@@ -69,30 +67,29 @@ new Vue({
 			}
 		},
 		record() {
-			let myAudio = this;
-			myAudio.isRecording = true;
-			var constraints = {audio:true};
-			navigator.mediaDevices.getUserMedia(constraints)
-			.then(function(mediaStream) {
-			  var mediaRecorder = new MediaRecorder(mediaStream);
-			  myAudio.mediaRecorder = mediaRecorder;
-			  mediaRecorder.start(10000);
-			  mediaRecorder.ondataavailable = function(e) {
-			  	console.log(e);
-				  myAudio.audio.push(e.data);
-				}
-			})
-			.catch(function(err) { console.log(err.name + ": " + err.message); });
+			let app = this;
+			this.isRecording = true;
+			this.mediaRecorder.start(10000);
+		  this.mediaRecorder.ondataavailable = function(e) {
+		  	console.log(e);
+			  app.recordedAudio.push(e.data);
+			}
 		}
 	},
+	mounted: function() {
+		let app = this;
+		var constraints = {audio:true};
+		navigator.mediaDevices.getUserMedia(constraints)
+		.then(function(mediaStream) {
+		  app.mediaRecorder = new MediaRecorder(mediaStream);
+		})
+		.catch(function(err) { console.log(err.name + ": " + err.message); });
+	},
 	watch: {
-		isRecording: function() {
-			console.log(this.isRecording);
-			console.log(this.audio);
-		},
+		selectedArtist: function() {},
 		selectedGenre: function() {
 			this.songs = [];
-			for(var song of this.songsList) {
+			for(var song of this.fetchedSongs) {
 				if(song.genre === this.selectedGenre) {
 					this.songs.push(song.title);
 				}
