@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MUSIC PLAYER</title>
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+	<div class="container" id='app'>
+		<br>
+		<div class="card text-white bg-info mb-3" style="max-width: 40rem;">
+		  <div class="card-header">
+		  	<h1 class="panel">Music Jukebox</h1>
+				<div class="bg-dark text-white rounded"></div>
+		  </div>
+		  <div class="card-body">
+		    <div class="form-group">
+					<label>Genre: </label>
+					<select class="form-control" v-model="selectedGenre">
+						<option v-for="genre in genres">{{genre}}</option>
+					</select>
+				</div>
+				<!-- <div class="form-group">
+					<label>Artist: </label>
+					<select class="form-control">
+						<option></option>
+					</select>
+				</div> -->
+				<div class="form-group">
+					<label>Song: </label>
+					<select class="form-control" v-model="selectedSong" id="songs">
+						<option v-for="song in songs">{{song}}</option>
+					</select>
+				</div>
+				<button title="play" @click="play" class="btn btn-success"><i class="material-icons">play_arrow</i></button>
+				<button title="pause" @click="pause" class="btn btn-warning"><i class="material-icons">pause</i></button>
+				<button title="stop" @click="stop" class="btn btn-danger"><i class="material-icons">stop</i></button>
+				<button title="rewind" @click="rewind" class="btn btn-primary"><i class="material-icons">fast_rewind</i></button>
+				<button title="forward" @click="forward" class="btn btn-primary"><i class="material-icons">fast_forward</i></button>
+				<button title="record" @click="record" class="btn btn-danger"><i class="material-icons">fiber_manual_record</i></button>
+				<audio id="music" :src="audioSrc" hidden autoplay loop></audio>
+		  </div>
+		</div>
+	</div>
+	<script src="./js/vue.js"></script>
+	<script src="./js/app.js"></script>
+</body>
+</html>
