@@ -17,7 +17,8 @@ new Vue({
 	methods: {
 		play() {
 			if(this.selectedSong != '') {
-				this.audioSrc = `./media/${this.selectedSong}.mp3`;
+				//this.audioSrc = `./media/${this.selectedSong}.mp3`;
+				this.audioSrc = this.selectedSong;
 				this.isPlaying = true;
 			}
 		},
@@ -34,12 +35,13 @@ new Vue({
 		stop() {
 			if(this.isRecording == true) {
 				this.isRecording = false;
-				this.mediaRecorder.pause();
+				this.mediaRecorder.stop();
 				var blob = new Blob(this.recordedAudio, {
 	        'type': 'audio/ogg; codecs=opus'
 	      });
 	      var audioURL = window.URL.createObjectURL(blob);
-	      this.audioSrc = audioURL;
+	      //this.audioSrc = audioURL;
+	      this.songs.push(audioURL);
 	      this.recordedAudio = [];
 	    } else if(this.isPlaying == true) {
 	    	this.audioSrc = '';
@@ -68,8 +70,11 @@ new Vue({
 		},
 		record() {
 			let app = this;
+			this.audioSrc = '';
+			this.isPlaying = false;
 			this.isRecording = true;
-			this.mediaRecorder.start(10000);
+			this.mediaRecorder = new MediaRecorder(this.mediaStream);
+			this.mediaRecorder.start(1000);
 		  this.mediaRecorder.ondataavailable = function(e) {
 		  	console.log(e);
 			  app.recordedAudio.push(e.data);
@@ -81,7 +86,7 @@ new Vue({
 		var constraints = {audio:true};
 		navigator.mediaDevices.getUserMedia(constraints)
 		.then(function(mediaStream) {
-		  app.mediaRecorder = new MediaRecorder(mediaStream);
+		  app.mediaStream = mediaStream;
 		})
 		.catch(function(err) { console.log(err.name + ": " + err.message); });
 	},
