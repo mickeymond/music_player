@@ -3,10 +3,12 @@ new Vue({
 	data: {
 		songsList: [],
 		genres: [],
-		audioSrc: '',
-		selectedGenre: '',
-		selectedSong: '',
+		artists: [],
 		songs: [],
+		selectedGenre: '',
+		selectedArtist: '',
+		selectedSong: '',
+		audioSrc: '',
 		isRecording: false,
 		isPlaying: false,
 		audio: []
