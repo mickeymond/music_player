@@ -4,6 +4,20 @@
 	<title>Music Jukebox</title>
 	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDMpoHEwuoxcC6rYD8A2uOYmNOiOCKNamM",
+    authDomain: "firstappendpoint.firebaseapp.com",
+    databaseURL: "https://firstappendpoint.firebaseio.com",
+    projectId: "firstappendpoint",
+    storageBucket: "firstappendpoint.appspot.com",
+    messagingSenderId: "458356373181"
+  };
+  firebase.initializeApp(config);
+</script>
 </head>
 <body>
 	<div class="container" id='app'>
@@ -29,7 +43,7 @@
 				<div class="form-group">
 					<label>Song: </label>
 					<select class="form-control" v-model="selectedSong" id="songs">
-						<option v-for="song in songs">{{song}}</option>
+						<option v-for="song in songs" :value="song.fileUrl">{{song.fileName}}</option>
 					</select>
 				</div>
 				<button title="play" @click="play" class="btn btn-success"><i class="material-icons">play_arrow</i></button>

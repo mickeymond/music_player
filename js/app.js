@@ -1,7 +1,6 @@
 new Vue({
 	el: '#app',
 	data: {
-		fetchedSongs: [],
 		genres: [],
 		artists: [],
 		songs: [],
@@ -17,7 +16,6 @@ new Vue({
 	methods: {
 		play() {
 			if(this.selectedSong != '') {
-				//this.audioSrc = `./media/${this.selectedSong}.mp3`;
 				this.audioSrc = this.selectedSong;
 				this.isPlaying = true;
 			}
@@ -36,13 +34,17 @@ new Vue({
 			if(this.isRecording == true) {
 				this.isRecording = false;
 				this.mediaRecorder.stop();
-				var blob = new Blob(this.recordedAudio, {
+				var file = new Blob(this.recordedAudio, {
 	        'type': 'audio/ogg; codecs=opus'
 	      });
-	      var audioURL = window.URL.createObjectURL(blob);
-	      //this.audioSrc = audioURL;
-	      this.songs.push(audioURL);
-	      this.recordedAudio = [];
+	      var fileName = prompt('Name your file');
+	      firebase.storage().ref(`/songs/${fileName}.ogg`).put(file)
+	      .then(snapshot => {
+	      	firebase.database().ref(`/songs`).push({
+	      		fileName: fileName,
+	      		fileUrl: snapshot.downloadURL
+	      	}).then(() => alert('File upload was successful'));
+	      });
 	    } else if(this.isPlaying == true) {
 	    	this.audioSrc = '';
 	    	this.isPlaying = false;
@@ -55,7 +57,7 @@ new Vue({
 				if(selectedSong < songsList.length) {
 					this.selectedSong = songsList.options[selectedSong - 1].value;
 				}
-				this.audioSrc = `./media/${this.selectedSong}.mp3`;
+				this.audioSrc = this.selectedSong;
 			}
 		},
 		next() {
@@ -65,7 +67,7 @@ new Vue({
 				if(selectedSong < songsList.length) {
 					this.selectedSong = songsList.options[selectedSong + 1].value;
 				}
-				this.audioSrc = `./media/${this.selectedSong}.mp3`;
+				this.audioSrc = this.selectedSong;
 			}
 		},
 		record() {
@@ -73,32 +75,41 @@ new Vue({
 			this.audioSrc = '';
 			this.isPlaying = false;
 			this.isRecording = true;
-			this.mediaRecorder = new MediaRecorder(this.mediaStream);
-			this.mediaRecorder.start(1000);
-		  this.mediaRecorder.ondataavailable = function(e) {
-		  	console.log(e);
+			this.recordedAudio = [];
+			var mediaRecorder = new MediaRecorder(this.mediaStream);
+			this.mediaRecorder = mediaRecorder;
+			mediaRecorder.start(1000);
+		  mediaRecorder.ondataavailable = function(e) {
 			  app.recordedAudio.push(e.data);
 			}
 		}
 	},
 	mounted: function() {
 		let app = this;
+		this.fetchSongs;
 		var constraints = {audio:true};
 		navigator.mediaDevices.getUserMedia(constraints)
 		.then(function(mediaStream) {
 		  app.mediaStream = mediaStream;
 		})
 		.catch(function(err) { console.log(err.name + ": " + err.message); });
+		console.log(this);
+	},
+	computed: {
+		fetchSongs() {
+			let app = this;
+			firebase.database().ref('/songs').on('value', snapshot => {
+				var songs = snapshot.val();
+				app.songs = [];
+				for(let song in songs) {
+					app.songs.push(songs[song]);
+				}
+			});
+		}
 	},
 	watch: {
-		selectedArtist: function() {},
-		selectedGenre: function() {
-			this.songs = [];
-			for(var song of this.fetchedSongs) {
-				if(song.genre === this.selectedGenre) {
-					this.songs.push(song.title);
-				}
-			}
+		selectedSong: function() {
+			console.log(this.selectedSong);
 		}
 	}
 });
